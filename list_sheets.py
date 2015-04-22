@@ -22,23 +22,15 @@ gd_client.auth_token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
 
 
 # Find this value in the url with 'key=XXX' and copy XXX below
+# This is spreadsheet with title:  Network change for ALB bonding
 spreadsheet_key = '1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y'
 # All spreadsheets have worksheets. I think worksheet #1 by default always
 # has a value of 'od6'
 worksheet_id = 'od6'
 
-# Prepare the dictionary to write
-weight = '720'
-dict = {}
-dict['date'] = time.strftime('%m/%d/%Y')
-dict['time'] = time.strftime('%H:%M:%S')
-dict['weight'] = weight
-print dict
-
-
 cell_query = gdata.spreadsheets.client.CellQuery(
 min_row=39, max_row=39, min_col=1, max_col=1, return_empty=True)
-cells = gd_client.GetCells('1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y', worksheet_id, q=cell_query)
+cells = gd_client.GetCells(spreadsheet_key, worksheet_id, q=cell_query)
 cell_entry = cells.entry[0]
 cell_entry.cell.input_value = 'hackatron.met.no'
 gd_client.update(cell_entry) # This is the call to Google Server to update
