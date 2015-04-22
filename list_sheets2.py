@@ -30,6 +30,9 @@ if __name__ == '__main__':
         #credentials = run(flow_from_clientsecrets("client_secrets.json", scope=["https://spreadsheets.google.com/feeds"]), storage)
         credentials = oauth2client.tools.run(flow, storage)
 
+    if credentials.access_token_expired:
+        credentials.refresh(httplib2.Http())
+
     gd_client = gdata.spreadsheets.client.SpreadsheetsClient()
     gd_client.auth_token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
 
@@ -46,3 +49,14 @@ if __name__ == '__main__':
     cell_entry.cell.input_value = 'hackatron.met.no'
     gd_client.update(cell_entry) # This is the call to Google Server to update
 
+
+
+    # Use it within old gdata
+    import gdata.spreadsheet.service
+    import gdata.service
+
+    client = gdata.spreadsheet.service.SpreadsheetsService(
+    additional_headers={'Authorization' : 'Bearer %s' % credentials.access_token})
+
+    entry = client.GetSpreadsheetsFeed('1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y')
+    print entry.title
