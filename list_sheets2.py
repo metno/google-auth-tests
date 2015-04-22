@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 
 import os
 import math
@@ -9,13 +11,6 @@ import oauth2client.tools
 
 import gdata.gauth
 import gdata.spreadsheets.client
-
-int2base = lambda a, b: ''.join(
-    [(string.digits + string.lowercase + string.uppercase)[(a/b**i)%b] for i in xrange(int(math.log(a, b)), -1, -1)]
-    )
-
-def to_wid(gid_id):
-    return int2base(gid_id ^ 31578, 36) 
 
 if __name__ == '__main__':
 
@@ -41,12 +36,10 @@ if __name__ == '__main__':
     #print gd_client.get_spreadsheets()
 
     spreadsheet_key = '1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y'
-    worksheet_id = to_wid(0)
+    worksheet_id = 1
 
-    cell_query = gdata.spreadsheets.client.CellQuery(
-        range="A39:A39",
-        return_empty=True
-        )
+    cell_query = gdata.spreadsheets.client.CellQuery( range="A40",  return_empty=True )
+    # range = A1:B20 equals with range = R1C1:R20C2
 
     cells = gd_client.GetCells(spreadsheet_key, worksheet_id, q=cell_query)
     cell_entry = cells.entry[0]
