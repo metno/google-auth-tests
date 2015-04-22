@@ -5,8 +5,8 @@ import oauth2client.file
 import oauth2client.client
 import oauth2client.tools
 
-import gdata.spreadsheets.client
 import gdata.gauth
+import gdata.spreadsheets.client
 
 
 if __name__ == '__main__':
@@ -30,6 +30,20 @@ if __name__ == '__main__':
     gd_client = gdata.spreadsheets.client.SpreadsheetsClient()
     gd_client.auth_token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
 
-    print gd_client.get_spreadsheets()
+    #print gd_client.get_spreadsheets()
+
+    spreadsheet_key = '1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y'
+    worksheet_id = 'od6'
+#    worksheet_id = None
+
+    cell_query = gdata.spreadsheets.client.CellQuery(
+        range="A39:A39",
+        return_empty=True
+        )
+
+    cells = gd_client.GetCells(spreadsheet_key, worksheet_id, q=cell_query)
+    cell_entry = cells.entry[0]
+    cell_entry.cell.input_value = 'hackatron.met.no'
+    gd_client.update(cell_entry) # This is the call to Google Server to update
 
 
