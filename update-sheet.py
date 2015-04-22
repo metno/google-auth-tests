@@ -1,49 +1,93 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
-# Do OAuth2 stuff to create credentials object
-from oauth2client.file import Storage
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.tools import run
-import time
+import os
+import string
 
-storage = Storage("creds.dat")
-credentials = storage.get()
-if credentials is None or credentials.invalid:
-  credentials = run(flow_from_clientsecrets("client_secrets.json", scope=["https://spreadsheets.google.com/feeds"]), storage)
+# Import authentication libraries
+import oauth2client.file
+import oauth2client.client
+import oauth2client.tools
 
-# Use it within gdata
-import gdata.spreadsheets.client
+# Import editing  libraries
 import gdata.gauth
-import gdata.spreadsheet.service
-gd_client = gdata.spreadsheets.client.SpreadsheetsClient()
-gd_client.auth_token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
+import gdata.spreadsheets.client
 
-#print gd_client.get_spreadsheets()
+if __name__ == '__main__':
 
+    # Just create ~/.scriptname.secret for oauth2 credentials
+    script_name = os.path.basename(__file__).split('.')[0]
+    secret_file = os.path.expanduser("~/." + script_name + ".secret")
 
-# Find this value in the url with 'key=XXX' and copy XXX below
-# This is spreadsheet with title:  Network change for ALB bonding
-spreadsheet_key = '1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y'
-# All spreadsheets have worksheets. I think worksheet #1 by default always
-# has a value of 'od6'
-worksheet_id = 'od6'
+    # Create empty or get oauth2 credentials
+    storage = oauth2client.file.Storage(secret_file)
+    credentials = storage.get()
 
-cell_query = gdata.spreadsheets.client.CellQuery(
-min_row=39, max_row=39, min_col=1, max_col=1, return_empty=True)
-cells = gd_client.GetCells(spreadsheet_key, worksheet_id, q=cell_query)
-cell_entry = cells.entry[0]
-cell_entry.cell.input_value = 'hackatron.met.no'
-gd_client.update(cell_entry) # This is the call to Google Server to update
+    # If no credentials exists authenticate with google 
+    if credentials is None or credentials.invalid:
 
+        # Create Oauth flow
+        flow = oauth2client.client.OAuth2WebServerFlow(
+            client_id='867946856044-n8n69pnpmm3m79h6sqr7kkfgssju9lpi.apps.googleusercontent.com',
+            client_secret='n0I4ljpXxzK45e6OUog5ETRX',
+            scope=["https://spreadsheets.google.com/feeds"],
+            redirect_uri=' urn:ietf:wg:oauth:2.0:oob'
+            )
 
-#Batch update
-#range = "A6:D1113"
-#cellq = gdata.spreadsheets.client.CellQuery(range=range, return_empty='true')
-#cells = gd_client.GetCells(sprd_key, wrksht_key, q=cellq)
-#batch = gdata.spreadsheets.data.BuildBatchCellsUpdate(sprd_key, wrksht_key)
-#n = 1
-#for cell in cells.entry:
-#cell.cell.input_value = str(n)
-#batch.add_batch_entry(cell, cell.id.text, batch_id_string=cell.title.text, operation_string='update')
-#n = n + 1
-#gd_client.batch(batch, force=True) # A single call to Google Server to update all cells.
+        # Alternative method with client_id and client_secret in json
+        #credentials = oauth2client.tools.run(
+        #    flow_from_clientsecrets("client_secrets.json", scope=["https://spreadsheets.google.com/feeds"]), 
+        #    storage
+        #    )
+        
+        # Get and store the credentials
+        credentials = oauth2client.tools.run(flow, storage)
+
+    # Force refresh of access token
+    # Hopfully stores new token to disk
+    if credentials.access_token_expired:
+        credentials.refresh(httplib2.Http())
+
+    # Get a spreadsheet client object
+    gd_client = gdata.spreadsheets.client.SpreadsheetsClient()
+
+    # Authenticate 
+    gd_client.auth_token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
+
+    # List all spreadsheets
+    #print gd_client.get_spreadsheets()
+
+    # Our Hackaton spreadsheet
+    spreadsheet_key = '1slih48v4Fr7uaZDwFZRQ3U0_KlOhr2IHP1URzTx9ECM'
+
+    # Sheet number one
+    worksheet_id = 1
+    
+    # Create the range we're working on
+    #   range = A1:B20 equals with range = R1C1:R20C2
+    cell_query = gdata.spreadsheets.client.CellQuery( range="A1",  return_empty=True )
+
+    # Get the cell range from the sheet
+    cells = gd_client.GetCells(spreadsheet_key, worksheet_id, q=cell_query)
+
+    # We're working on the only cell in our range
+    cell_entry = cells.entry[0]
+
+    # Set cell value
+    cell_entry.cell.input_value = 'HACKATON!'
+
+    # Update spreadsheet
+    gd_client.update(cell_entry) 
+
+    #
+    # Example how to use gdata.spreadsheet.service with oauth2
+    #
+    # Use it within old gdata
+    #import gdata.spreadsheet.service
+    #import gdata.service
+    #
+    #client = gdata.spreadsheet.service.SpreadsheetsService(
+    #additional_headers={'Authorization' : 'Bearer %s' % credentials.access_token})
+    #
+    #entry = client.GetSpreadsheetsFeed(spreadsheet_key)
+    #print entry.title
