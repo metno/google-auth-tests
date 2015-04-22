@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import os
+import math
+import string
 import oauth2client.file
 import oauth2client.client
 import oauth2client.tools
@@ -8,6 +10,12 @@ import oauth2client.tools
 import gdata.gauth
 import gdata.spreadsheets.client
 
+int2base = lambda a, b: ''.join(
+    [(string.digits + string.lowercase + string.uppercase)[(a/b**i)%b] for i in xrange(int(math.log(a, b)), -1, -1)]
+    )
+
+def to_wid(gid_id):
+    return int2base(gid_id ^ 31578, 36) 
 
 if __name__ == '__main__':
 
@@ -33,8 +41,7 @@ if __name__ == '__main__':
     #print gd_client.get_spreadsheets()
 
     spreadsheet_key = '1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y'
-    worksheet_id = 'od6'
-#    worksheet_id = None
+    worksheet_id = to_wid(0)
 
     cell_query = gdata.spreadsheets.client.CellQuery(
         range="A39:A39",
@@ -45,5 +52,4 @@ if __name__ == '__main__':
     cell_entry = cells.entry[0]
     cell_entry.cell.input_value = 'hackatron.met.no'
     gd_client.update(cell_entry) # This is the call to Google Server to update
-
 
