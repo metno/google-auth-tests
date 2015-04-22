@@ -14,7 +14,9 @@ if credentials is None or credentials.invalid:
 # Use it within gdata
 import gdata.spreadsheets.client
 import gdata.gauth
-import gdata.spreadsheet.service
+import gdata.spreadsheets.data.Table
+
+
 gd_client = gdata.spreadsheets.client.SpreadsheetsClient()
 gd_client.auth_token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
 
@@ -26,7 +28,7 @@ gd_client.auth_token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
 spreadsheet_key = '1Ua0Ir53h12U2doayNXVBk6M6Q4fzDwaIBJGSh6jqo-Y'
 # All spreadsheets have worksheets. I think worksheet #1 by default always
 # has a value of 'od6'
-worksheet_id = 'od6'
+worksheet_id = '1'
 
 cell_query = gdata.spreadsheets.client.CellQuery(
 min_row=39, max_row=39, min_col=1, max_col=1, return_empty=True)
