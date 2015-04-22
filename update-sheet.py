@@ -3,6 +3,7 @@
 
 import os
 import string
+import httplib2
 
 # Import authentication libraries
 import oauth2client.file
