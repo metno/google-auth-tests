@@ -42,7 +42,20 @@ if __name__ == '__main__':
         #    )
         
         # Get and store the credentials
-        credentials = oauth2client.tools.run(flow, storage)
+      
+    # This gives deprecation waring ..     
+    # credentials = oauth2client.tools.run(flow, storage)
+        
+    # Use this instead (Hurray!).. 
+    import argparse
+    from oauth2client import tools
+    import sys
+    argparser = argparse.ArgumentParser(
+    description=__doc__,
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    parents=[tools.argparser])
+    flags = argparser.parse_args(sys.argv[1:])
+    credentials = tools.run_flow(flow, storage, flags)
 
     # Force refresh of access token
     # Hopfully stores new token to disk
