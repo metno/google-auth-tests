@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import string
 import httplib2
+import argparse
 
 # Import authentication libraries
 import oauth2client.file
@@ -42,20 +44,13 @@ if __name__ == '__main__':
         #    )
         
         # Get and store the credentials
-      
-    # This gives deprecation waring ..     
-    # credentials = oauth2client.tools.run(flow, storage)
-        
-    # Use this instead (Hurray!).. 
-    import argparse
-    from oauth2client import tools
-    import sys
-    argparser = argparse.ArgumentParser(
-    description=__doc__,
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-    parents=[tools.argparser])
-    flags = argparser.parse_args(sys.argv[1:])
-    credentials = tools.run_flow(flow, storage, flags)
+        argparser = argparse.ArgumentParser(
+            description=__doc__,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            parents=[oauth2client.tools.argparser]
+            )
+        flags = argparser.parse_args(sys.argv[1:])
+        credentials = oauth2client.tools.run_flow(flow, storage, flags)
 
     # Force refresh of access token
     # Hopfully stores new token to disk
